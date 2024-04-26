@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/KKGo-Software-engineering/assessment-tax/common"
@@ -11,21 +9,13 @@ import (
 )
 
 func main() {
-	calc := tax.NewCalculator()
-	result := calc.Calculate(tax.CalculationRequest{
-		TotalIncome: 500000,
-	})
-
-	jsonStr, _ := json.Marshal(result)
-
-	fmt.Printf("result: %v\n", string(jsonStr))
-
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
 	})
 
-	taxController := tax.NewTaxController(&calc)
+	calculator := tax.NewCalculator()
+	taxController := tax.NewTaxController(&calculator)
 
 	configureController(e, &taxController)
 
