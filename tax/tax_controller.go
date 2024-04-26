@@ -1,7 +1,7 @@
 package tax
 
 import (
-	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/chuckboliver/assessment-tax/common"
@@ -27,11 +27,11 @@ func (c *TaxController) RouteConfig(e *echo.Echo) {
 func (c *TaxController) CalculateTax(ctx echo.Context) error {
 	var request CalculationRequest
 	if err := ctx.Bind(&request); err != nil {
+		slog.Error("Failed to bind request", err)
 		ctx.NoContent(http.StatusBadRequest)
 		return err
 	}
 
 	result := c.taxCalculator.Calculate(request)
-	fmt.Printf("result: %v\n", result)
 	return ctx.JSON(http.StatusOK, result)
 }

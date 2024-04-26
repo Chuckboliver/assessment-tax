@@ -3,6 +3,7 @@ module github.com/chuckboliver/assessment-tax
 go 1.21.9
 
 require (
+	github.com/golang/mock v1.6.0
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/stretchr/testify v1.9.0
 )

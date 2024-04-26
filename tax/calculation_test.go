@@ -28,6 +28,22 @@ func TestCalculateTax(t *testing.T) {
 				Tax: 29000,
 			},
 		},
+		{
+			name: "Should calculate tax correctly, given total income and withholding tax",
+			param: CalculationRequest{
+				TotalIncome: 500000,
+				Wht:         25000,
+				Allowances: []Allowance{
+					{
+						AllowanceType: "donation",
+						Amount:        0,
+					},
+				},
+			},
+			expected: CalculationResult{
+				Tax: 4000,
+			},
+		},
 	}
 
 	for _, tc := range testCases {

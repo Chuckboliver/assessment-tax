@@ -50,6 +50,8 @@ func (c *CalculatorImpl) Calculate(param CalculationRequest) CalculationResult {
 		tax += (income - 150000) * 0.1
 	}
 
+	tax -= param.Wht
+
 	return CalculationResult{
 		Tax: common.Float64(tax),
 	}
