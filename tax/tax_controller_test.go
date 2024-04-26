@@ -15,9 +15,9 @@ import (
 
 func TestPostCalculateTax(t *testing.T) {
 	testCases := []struct {
-		name   string
-		param  CalculationRequest
-		expect CalculationResult
+		name     string
+		param    CalculationRequest
+		expected CalculationResult
 	}{
 		{
 			name: "calculate tax correctly, given only total income",
@@ -31,7 +31,7 @@ func TestPostCalculateTax(t *testing.T) {
 					},
 				},
 			},
-			expect: CalculationResult{
+			expected: CalculationResult{
 				Tax: 29000,
 			},
 		},
@@ -47,8 +47,40 @@ func TestPostCalculateTax(t *testing.T) {
 					},
 				},
 			},
-			expect: CalculationResult{
+			expected: CalculationResult{
 				Tax: 4000,
+			},
+		},
+		{
+			name: "Should calculate tax correctly, given total income and donation (over allowance limit of 100000)",
+			param: CalculationRequest{
+				TotalIncome: 500000,
+				Wht:         0,
+				Allowances: []Allowance{
+					{
+						AllowanceType: AllowanceDonation,
+						Amount:        200000,
+					},
+				},
+			},
+			expected: CalculationResult{
+				Tax: 19000,
+			},
+		},
+		{
+			name: "Should calculate tax correctly, given total income and donation (under allowance limit of 100000)",
+			param: CalculationRequest{
+				TotalIncome: 500000,
+				Wht:         0,
+				Allowances: []Allowance{
+					{
+						AllowanceType: AllowanceDonation,
+						Amount:        90000,
+					},
+				},
+			},
+			expected: CalculationResult{
+				Tax: 20000,
 			},
 		},
 	}
@@ -62,7 +94,7 @@ func TestPostCalculateTax(t *testing.T) {
 			recorder := httptest.NewRecorder()
 
 			taxCalculator := NewMockCalculator(ctrl)
-			taxCalculator.EXPECT().Calculate(tc.param).Times(1).Return(tc.expect)
+			taxCalculator.EXPECT().Calculate(tc.param).Times(1).Return(tc.expected)
 
 			taxController := NewTaxController(taxCalculator)
 			taxController.RouteConfig(e)
@@ -87,7 +119,7 @@ func TestPostCalculateTax(t *testing.T) {
 			err = json.Unmarshal(responseBytes, &gotCalculationResult)
 			require.NoError(t, err)
 
-			require.Equal(t, tc.expect, gotCalculationResult)
+			require.Equal(t, tc.expected, gotCalculationResult)
 		})
 	}
 }
