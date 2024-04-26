@@ -1,7 +1,7 @@
 package tax
 
 import (
-	"github.com/KKGo-Software-engineering/assessment-tax/common"
+	"github.com/chuckboliver/assessment-tax/common"
 )
 
 type CalculationRequest struct {
@@ -49,6 +49,8 @@ func (c *CalculatorImpl) Calculate(param CalculationRequest) CalculationResult {
 	if income > 150000 {
 		tax += (income - 150000) * 0.1
 	}
+
+	tax -= param.Wht
 
 	return CalculationResult{
 		Tax: common.Float64(tax),
