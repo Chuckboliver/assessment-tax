@@ -1,7 +1,7 @@
 package tax
 
 import (
-	"github.com/KKGo-Software-engineering/assessment-tax/common"
+	"github.com/chuckboliver/assessment-tax/common"
 )
 
 type CalculationRequest struct {
