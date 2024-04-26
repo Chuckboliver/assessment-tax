@@ -19,13 +19,17 @@ type CalculationResult struct {
 	Tax common.Float64 `json:"tax"`
 }
 
-type Calculator struct{}
-
-func NewCalculator() Calculator {
-	return Calculator{}
+type Calculator interface {
+	Calculate(param CalculationRequest) CalculationResult
 }
 
-func (c *Calculator) Calculate(param CalculationRequest) CalculationResult {
+type CalculatorImpl struct{}
+
+func NewCalculator() CalculatorImpl {
+	return CalculatorImpl{}
+}
+
+func (c *CalculatorImpl) Calculate(param CalculationRequest) CalculationResult {
 	income := param.TotalIncome - 60000
 
 	tax := 0.0
