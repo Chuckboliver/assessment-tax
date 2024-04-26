@@ -19,7 +19,7 @@ func TestCalculateTax(t *testing.T) {
 				Wht:         0,
 				Allowances: []Allowance{
 					{
-						AllowanceType: "donation",
+						AllowanceType: AllowanceDonation,
 						Amount:        0,
 					},
 				},
@@ -35,13 +35,45 @@ func TestCalculateTax(t *testing.T) {
 				Wht:         25000,
 				Allowances: []Allowance{
 					{
-						AllowanceType: "donation",
+						AllowanceType: AllowanceDonation,
 						Amount:        0,
 					},
 				},
 			},
 			expected: CalculationResult{
 				Tax: 4000,
+			},
+		},
+		{
+			name: "Should calculate tax correctly, given total income and donation (over allowance limit of 100000)",
+			param: CalculationRequest{
+				TotalIncome: 500000,
+				Wht:         0,
+				Allowances: []Allowance{
+					{
+						AllowanceType: AllowanceDonation,
+						Amount:        200000,
+					},
+				},
+			},
+			expected: CalculationResult{
+				Tax: 19000,
+			},
+		},
+		{
+			name: "Should calculate tax correctly, given total income and donation (under allowance limit of 100000)",
+			param: CalculationRequest{
+				TotalIncome: 500000,
+				Wht:         0,
+				Allowances: []Allowance{
+					{
+						AllowanceType: AllowanceDonation,
+						Amount:        90000,
+					},
+				},
+			},
+			expected: CalculationResult{
+				Tax: 20000,
 			},
 		},
 	}

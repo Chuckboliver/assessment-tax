@@ -11,9 +11,15 @@ type CalculationRequest struct {
 }
 
 type Allowance struct {
-	AllowanceType string  `json:"allowanceType"`
-	Amount        float64 `json:"amount"`
+	AllowanceType AllowanceType `json:"allowanceType"`
+	Amount        float64       `json:"amount"`
 }
+
+type AllowanceType string
+
+const (
+	AllowanceDonation AllowanceType = "donation"
+)
 
 type CalculationResult struct {
 	Tax common.Float64 `json:"tax"`
@@ -31,6 +37,13 @@ func NewCalculator() CalculatorImpl {
 
 func (c *CalculatorImpl) Calculate(param CalculationRequest) CalculationResult {
 	income := param.TotalIncome - 60000
+
+	for _, v := range param.Allowances {
+		switch v.AllowanceType {
+		case AllowanceDonation:
+			income -= min(v.Amount, 100000)
+		}
+	}
 
 	tax := 0.0
 
