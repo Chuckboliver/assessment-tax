@@ -7,6 +7,18 @@ import (
 )
 
 func TestCalculateTax(t *testing.T) {
+	taxLevels1 := createEmptyTaxLevels()
+	taxLevels1[1].Tax = 29000
+
+	taxLevels2 := createEmptyTaxLevels()
+	taxLevels2[1].Tax = 29000
+
+	taxLevels3 := createEmptyTaxLevels()
+	taxLevels3[1].Tax = 19000
+
+	taxLevels4 := createEmptyTaxLevels()
+	taxLevels4[1].Tax = 20000
+
 	testCases := []struct {
 		name     string
 		param    CalculationRequest
@@ -25,7 +37,8 @@ func TestCalculateTax(t *testing.T) {
 				},
 			},
 			expected: CalculationResult{
-				Tax: 29000,
+				Tax:       29000,
+				TaxLevels: taxLevels1,
 			},
 		},
 		{
@@ -41,7 +54,8 @@ func TestCalculateTax(t *testing.T) {
 				},
 			},
 			expected: CalculationResult{
-				Tax: 4000,
+				Tax:       4000,
+				TaxLevels: taxLevels2,
 			},
 		},
 		{
@@ -57,7 +71,8 @@ func TestCalculateTax(t *testing.T) {
 				},
 			},
 			expected: CalculationResult{
-				Tax: 19000,
+				Tax:       19000,
+				TaxLevels: taxLevels3,
 			},
 		},
 		{
@@ -73,7 +88,8 @@ func TestCalculateTax(t *testing.T) {
 				},
 			},
 			expected: CalculationResult{
-				Tax: 20000,
+				Tax:       20000,
+				TaxLevels: taxLevels4,
 			},
 		},
 	}
@@ -84,6 +100,7 @@ func TestCalculateTax(t *testing.T) {
 			result := calculator.Calculate(tc.param)
 
 			require.Equal(t, tc.expected.Tax, result.Tax)
+			require.Equal(t, tc.expected.TaxLevels, result.TaxLevels)
 		})
 	}
 }
