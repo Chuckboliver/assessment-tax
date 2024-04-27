@@ -1,8 +1,10 @@
 package tax
 
 import (
+	"context"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -96,8 +98,22 @@ func TestCalculateTax(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			calculator := NewCalculator()
-			result := calculator.Calculate(tc.param)
+			ctrl := gomock.NewController(t)
+
+			taxConfigRepo := NewMockTaxConfigRepository(ctrl)
+
+			ctx := context.Background()
+			taxConfigRepo.EXPECT().FindByName(ctx, "personal_deduction").Times(1).Return(
+				&Config{
+					Name:  "personal_deduction",
+					Value: 60000,
+				},
+				nil,
+			)
+
+			calculator := NewCalculator(taxConfigRepo)
+
+			result := calculator.Calculate(ctx, tc.param)
 
 			require.Equal(t, tc.expected.Tax, result.Tax)
 			require.Equal(t, tc.expected.TaxLevels, result.TaxLevels)

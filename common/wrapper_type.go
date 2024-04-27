@@ -1,6 +1,8 @@
 package common
 
-import "strconv"
+import (
+	"strconv"
+)
 
 type Float64 float64
 

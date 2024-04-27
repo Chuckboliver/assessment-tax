@@ -2,6 +2,7 @@ package tax
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -106,12 +107,12 @@ func TestPostCalculateTax(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			e := echo.New()
-			recorder := httptest.NewRecorder()
-
 			taxCalculator := NewMockCalculator(ctrl)
-			taxCalculator.EXPECT().Calculate(tc.param).Times(1).Return(tc.expected)
 
+			ctx := context.Background()
+			taxCalculator.EXPECT().Calculate(ctx, tc.param).Times(1).Return(tc.expected)
+
+			e := echo.New()
 			taxController := NewTaxController(taxCalculator)
 			taxController.RouteConfig(e)
 
@@ -120,9 +121,11 @@ func TestPostCalculateTax(t *testing.T) {
 
 			url := "/tax/calculations"
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
-			request.Header.Set("Content-Type", "application/json")
 			require.NoError(t, err)
 
+			request.Header.Set("Content-Type", "application/json")
+
+			recorder := httptest.NewRecorder()
 			e.ServeHTTP(recorder, request)
 
 			require.Equal(t, http.StatusOK, recorder.Code)

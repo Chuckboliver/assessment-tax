@@ -21,10 +21,10 @@ func NewTaxController(taxCalculator Calculator) TaxController {
 }
 
 func (c *TaxController) RouteConfig(e *echo.Echo) {
-	e.POST("/tax/calculations", c.CalculateTax)
+	e.POST("/tax/calculations", c.calculateTax)
 }
 
-func (c *TaxController) CalculateTax(ctx echo.Context) error {
+func (c *TaxController) calculateTax(ctx echo.Context) error {
 	var request CalculationRequest
 	if err := ctx.Bind(&request); err != nil {
 		slog.Error("Failed to bind request", err)
@@ -32,6 +32,6 @@ func (c *TaxController) CalculateTax(ctx echo.Context) error {
 		return err
 	}
 
-	result := c.taxCalculator.Calculate(request)
+	result := c.taxCalculator.Calculate(ctx.Request().Context(), request)
 	return ctx.JSON(http.StatusOK, result)
 }
