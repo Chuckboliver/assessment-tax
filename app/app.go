@@ -9,9 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func New() (*echo.Echo, error) {
-	e := echo.New()
-	db, err := postgres.New(postgres.PostgresConfig{})
+func New(config common.AppConfig) (*echo.Echo, error) {
+	db, err := postgres.New(config.DatabaseURL)
 	if err != nil {
 		slog.Error("Failed to connect to postgres", err)
 		return nil, err
@@ -20,6 +19,8 @@ func New() (*echo.Echo, error) {
 	taxConfigRepo := tax.NewTaxConfigPostgresRepository(db)
 	taxCalculator := tax.NewCalculator(taxConfigRepo)
 	taxController := tax.NewTaxController(taxCalculator)
+
+	e := common.NewConfiguredEcho()
 
 	configureController(e, &taxController)
 

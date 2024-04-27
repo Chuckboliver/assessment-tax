@@ -6,12 +6,6 @@ import (
 	"github.com/chuckboliver/assessment-tax/common"
 )
 
-type CalculationRequest struct {
-	TotalIncome float64     `json:"totalIncome"`
-	Wht         float64     `json:"wht"`
-	Allowances  []Allowance `json:"allowances"`
-}
-
 type Allowance struct {
 	AllowanceType AllowanceType `json:"allowanceType"`
 	Amount        float64       `json:"amount"`
@@ -42,7 +36,7 @@ type TaxConfigRepository interface {
 }
 
 type Calculator interface {
-	Calculate(ctx context.Context, param CalculationRequest) CalculationResult
+	Calculate(ctx context.Context, param calculationRequest) CalculationResult
 	GetPersonalDeduction(ctx context.Context) (float64, error)
 }
 
@@ -58,7 +52,7 @@ func NewCalculator(taxConfigRepository TaxConfigRepository) Calculator {
 	}
 }
 
-func (c *CalculatorImpl) Calculate(ctx context.Context, param CalculationRequest) CalculationResult {
+func (c *CalculatorImpl) Calculate(ctx context.Context, param calculationRequest) CalculationResult {
 	var personalDeduction float64
 	personalDeduction, err := c.GetPersonalDeduction(ctx)
 	if err != nil {

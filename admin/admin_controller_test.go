@@ -2,28 +2,45 @@ package admin
 
 import (
 	"bytes"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/chuckboliver/assessment-tax/common"
 	"github.com/golang/mock/gomock"
-	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 )
 
 func TestPostUpdatePersonalDeduction(t *testing.T) {
 	testCases := []struct {
 		name               string
-		arg                personalDeductionRequest
+		body               string
+		adminServiceStub   func(adminService *MockAdminService)
 		expectedStatusCode int
 	}{
 		{
 			name: "Should response with 200 status code, given valid request",
-			arg: personalDeductionRequest{
-				Amount: 20000.0,
+			body: `
+				{
+					"amount": 20000.0
+				}
+			`,
+			adminServiceStub: func(adminService *MockAdminService) {
+				adminService.EXPECT().UpdatePersonalDeduction(gomock.Any(), 20000.0).Times(1).Return(nil)
 			},
 			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name: "Should response with 400 status code, given invalid request",
+			body: `
+				{
+					"invalid": null
+				}
+			`,
+			adminServiceStub: func(adminService *MockAdminService) {
+				adminService.EXPECT().UpdatePersonalDeduction(gomock.Any(), gomock.Any()).Times(0)
+			},
+			expectedStatusCode: http.StatusBadRequest,
 		},
 	}
 
@@ -35,16 +52,14 @@ func TestPostUpdatePersonalDeduction(t *testing.T) {
 			adminService := NewMockAdminService(ctrl)
 			adminController := NewAdminController(adminService)
 
-			adminService.EXPECT().UpdatePersonalDeduction(gomock.Any(), 20000.0).Times(1).Return(nil)
+			tc.adminServiceStub(adminService)
 
-			e := echo.New()
+			e := common.NewConfiguredEcho()
+
 			adminController.RouteConfig(e)
 
-			jsonData, err := json.Marshal(tc.arg)
-			require.NoError(t, err)
-
 			url := "/admin/deductions/personal"
-			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(jsonData))
+			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader([]byte(tc.body)))
 			require.NoError(t, err)
 
 			request.Header.Set("Content-Type", "application/json")

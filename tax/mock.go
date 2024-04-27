@@ -73,7 +73,7 @@ func (m *MockCalculator) EXPECT() *MockCalculatorMockRecorder {
 }
 
 // Calculate mocks base method.
-func (m *MockCalculator) Calculate(ctx context.Context, param CalculationRequest) CalculationResult {
+func (m *MockCalculator) Calculate(ctx context.Context, param calculationRequest) CalculationResult {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Calculate", ctx, param)
 	ret0, _ := ret[0].(CalculationResult)

@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -25,13 +26,19 @@ func (a *AdminController) RouteConfig(e *echo.Echo) {
 }
 
 type personalDeductionRequest struct {
-	Amount float64 `json:"amount"`
+	Amount float64 `json:"amount" validate:"required"`
 }
 
 func (a *AdminController) updatePersonalDeduction(ctx echo.Context) error {
 	var request personalDeductionRequest
 	if err := ctx.Bind(&request); err != nil {
 		slog.Error("Failed to bind request", err)
+		ctx.NoContent(http.StatusBadRequest)
+		return err
+	}
+
+	if err := ctx.Validate(&request); err != nil {
+		fmt.Printf("err: %v\n", err)
 		ctx.NoContent(http.StatusBadRequest)
 		return err
 	}

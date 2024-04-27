@@ -9,8 +9,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/chuckboliver/assessment-tax/common"
 	"github.com/golang/mock/gomock"
-	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,21 +29,23 @@ func TestPostCalculateTax(t *testing.T) {
 
 	testCases := []struct {
 		name     string
-		param    CalculationRequest
+		body     string
 		expected CalculationResult
 	}{
 		{
 			name: "calculate tax correctly, given only total income",
-			param: CalculationRequest{
-				TotalIncome: 500000,
-				Wht:         0,
-				Allowances: []Allowance{
-					{
-						AllowanceType: "donation",
-						Amount:        0,
-					},
-				},
-			},
+			body: `
+				{
+					"totalIncome": 500000,
+					"wht": 0,
+					"allowances": [
+						{
+							"allowanceType": "donation",
+							"amount": 0
+						}
+					]
+				}
+			`,
 			expected: CalculationResult{
 				Tax:       29000,
 				TaxLevels: taxLevels1,
@@ -51,16 +53,18 @@ func TestPostCalculateTax(t *testing.T) {
 		},
 		{
 			name: "calculate tax correctly, given total income and withholding tax",
-			param: CalculationRequest{
-				TotalIncome: 500000,
-				Wht:         25000,
-				Allowances: []Allowance{
-					{
-						AllowanceType: "donation",
-						Amount:        0,
-					},
-				},
-			},
+			body: `
+				{
+					"totalIncome": 500000,
+					"wht": 25000,
+					"allowances": [
+						{
+							"allowanceType": "donation",
+							"amount": 0
+						}
+					]
+				}
+			`,
 			expected: CalculationResult{
 				Tax:       4000,
 				TaxLevels: taxLevels2,
@@ -68,16 +72,18 @@ func TestPostCalculateTax(t *testing.T) {
 		},
 		{
 			name: "Should calculate tax correctly, given total income and donation (over allowance limit of 100000)",
-			param: CalculationRequest{
-				TotalIncome: 500000,
-				Wht:         0,
-				Allowances: []Allowance{
-					{
-						AllowanceType: AllowanceDonation,
-						Amount:        200000,
-					},
-				},
-			},
+			body: `
+				{
+					"totalIncome": 500000,
+					"wht": 0,
+					"allowances": [
+						{
+							"allowanceType": "donation",
+							"amount": 200000
+						}
+					]
+				}
+			`,
 			expected: CalculationResult{
 				Tax:       19000,
 				TaxLevels: taxLevels3,
@@ -85,16 +91,18 @@ func TestPostCalculateTax(t *testing.T) {
 		},
 		{
 			name: "Should calculate tax correctly, given total income and donation (under allowance limit of 100000)",
-			param: CalculationRequest{
-				TotalIncome: 500000,
-				Wht:         0,
-				Allowances: []Allowance{
-					{
-						AllowanceType: AllowanceDonation,
-						Amount:        90000,
-					},
-				},
-			},
+			body: `
+				{
+					"totalIncome": 500000,
+					"wht": 0,
+					"allowances": [
+						{
+							"allowanceType": "donation",
+							"amount": 90000
+						}
+					]
+				}
+			`,
 			expected: CalculationResult{
 				Tax:       20000,
 				TaxLevels: taxLevels4,
@@ -109,18 +117,19 @@ func TestPostCalculateTax(t *testing.T) {
 
 			taxCalculator := NewMockCalculator(ctrl)
 
-			ctx := context.Background()
-			taxCalculator.EXPECT().Calculate(ctx, tc.param).Times(1).Return(tc.expected)
-
-			e := echo.New()
+			e := common.NewConfiguredEcho()
 			taxController := NewTaxController(taxCalculator)
 			taxController.RouteConfig(e)
 
-			data, err := json.Marshal(tc.param)
+			var expectedInputOfCalculate calculationRequest
+			err := json.Unmarshal([]byte(tc.body), &expectedInputOfCalculate)
 			require.NoError(t, err)
 
+			ctx := context.Background()
+			taxCalculator.EXPECT().Calculate(ctx, expectedInputOfCalculate).Times(1).Return(tc.expected)
+
 			url := "/tax/calculations"
-			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader([]byte(tc.body)))
 			require.NoError(t, err)
 
 			request.Header.Set("Content-Type", "application/json")

@@ -24,8 +24,14 @@ func (c *TaxController) RouteConfig(e *echo.Echo) {
 	e.POST("/tax/calculations", c.calculateTax)
 }
 
+type calculationRequest struct {
+	TotalIncome float64     `json:"totalIncome"`
+	Wht         float64     `json:"wht"`
+	Allowances  []Allowance `json:"allowances"`
+}
+
 func (c *TaxController) calculateTax(ctx echo.Context) error {
-	var request CalculationRequest
+	var request calculationRequest
 	if err := ctx.Bind(&request); err != nil {
 		slog.Error("Failed to bind request", err)
 		ctx.NoContent(http.StatusBadRequest)

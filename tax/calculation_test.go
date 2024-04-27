@@ -23,12 +23,12 @@ func TestCalculateTax(t *testing.T) {
 
 	testCases := []struct {
 		name     string
-		param    CalculationRequest
+		param    calculationRequest
 		expected CalculationResult
 	}{
 		{
 			name: "Should calculate tax correctly, given only total income",
-			param: CalculationRequest{
+			param: calculationRequest{
 				TotalIncome: 500000,
 				Wht:         0,
 				Allowances: []Allowance{
@@ -45,7 +45,7 @@ func TestCalculateTax(t *testing.T) {
 		},
 		{
 			name: "Should calculate tax correctly, given total income and withholding tax",
-			param: CalculationRequest{
+			param: calculationRequest{
 				TotalIncome: 500000,
 				Wht:         25000,
 				Allowances: []Allowance{
@@ -62,7 +62,7 @@ func TestCalculateTax(t *testing.T) {
 		},
 		{
 			name: "Should calculate tax correctly, given total income and donation (over allowance limit of 100000)",
-			param: CalculationRequest{
+			param: calculationRequest{
 				TotalIncome: 500000,
 				Wht:         0,
 				Allowances: []Allowance{
@@ -79,7 +79,7 @@ func TestCalculateTax(t *testing.T) {
 		},
 		{
 			name: "Should calculate tax correctly, given total income and donation (under allowance limit of 100000)",
-			param: CalculationRequest{
+			param: calculationRequest{
 				TotalIncome: 500000,
 				Wht:         0,
 				Allowances: []Allowance{
