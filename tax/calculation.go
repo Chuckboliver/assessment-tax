@@ -22,7 +22,13 @@ const (
 )
 
 type CalculationResult struct {
-	Tax common.Float64 `json:"tax"`
+	Tax       common.Float64 `json:"tax"`
+	TaxLevels []TaxLevel     `json:"taxLevel"`
+}
+
+type TaxLevel struct {
+	Level string         `json:"level"`
+	Tax   common.Float64 `json:"tax"`
 }
 
 type Calculator interface {
@@ -45,27 +51,63 @@ func (c *CalculatorImpl) Calculate(param CalculationRequest) CalculationResult {
 		}
 	}
 
+	taxLevels := createEmptyTaxLevels()
+
 	tax := 0.0
 
 	if income > 2000000 {
-		tax += (income - 2000000) * 0.35
+		currentLevelTax := (income - 2000000) * 0.35
+		taxLevels[4].Tax = common.Float64(currentLevelTax)
+		tax += currentLevelTax
 	}
 
 	if income > 1000000 {
-		tax += (income - 1000000) * 0.2
+		currentLevelTax := (income - 1000000) * 0.2
+		taxLevels[3].Tax = common.Float64(currentLevelTax)
+		tax += currentLevelTax
 	}
 
 	if income > 500000 {
-		tax += (income - 500000) * 0.15
+		currentLevelTax := (income - 500000) * 0.15
+		taxLevels[2].Tax = common.Float64(currentLevelTax)
+		tax += currentLevelTax
 	}
 
 	if income > 150000 {
-		tax += (income - 150000) * 0.1
+		currentLevelTax := (income - 150000) * 0.1
+		taxLevels[1].Tax = common.Float64(currentLevelTax)
+		tax += currentLevelTax
 	}
 
 	tax -= param.Wht
 
 	return CalculationResult{
-		Tax: common.Float64(tax),
+		Tax:       common.Float64(tax),
+		TaxLevels: taxLevels,
+	}
+}
+
+func createEmptyTaxLevels() []TaxLevel {
+	return []TaxLevel{
+		{
+			Level: "0-150,000",
+			Tax:   0,
+		},
+		{
+			Level: "150,001-500,000",
+			Tax:   0,
+		},
+		{
+			Level: "500,001-1,000,000",
+			Tax:   0,
+		},
+		{
+			Level: "1,000,001-2,000,000",
+			Tax:   0,
+		},
+		{
+			Level: "2,000,001 ขึ้นไป",
+			Tax:   0,
+		},
 	}
 }
