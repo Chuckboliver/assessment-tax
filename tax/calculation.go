@@ -15,6 +15,7 @@ type AllowanceType string
 
 const (
 	AllowanceDonation AllowanceType = "donation"
+	AllowanceKReceipt AllowanceType = "k-receipt"
 )
 
 const (
@@ -23,6 +24,7 @@ const (
 
 type CalculationResultWithTaxLevel struct {
 	Tax       common.Float64 `json:"tax"`
+	TaxRefund common.Float64 `json:"taxRefund"`
 	TaxLevels []TaxLevel     `json:"taxLevel"`
 }
 
@@ -33,6 +35,7 @@ type BatchCalculationResult struct {
 type CalculationResult struct {
 	TotalIncome common.Float64 `json:"totalIncome"`
 	Tax         common.Float64 `json:"tax"`
+	TaxRefund   common.Float64 `json:"taxRefund"`
 }
 
 type TaxLevel struct {
@@ -64,12 +67,7 @@ func NewCalculator(taxConfigRepository TaxConfigRepository) Calculator {
 func (c *CalculatorImpl) calculate(personalDeduction float64, param calculationRequest) CalculationResultWithTaxLevel {
 	income := param.TotalIncome - personalDeduction
 
-	for _, v := range param.Allowances {
-		switch v.AllowanceType {
-		case AllowanceDonation:
-			income -= min(v.Amount, 100000)
-		}
-	}
+	income = c.applyAllowances(income, param.Allowances)
 
 	taxLevels := createEmptyTaxLevels()
 
@@ -100,9 +98,15 @@ func (c *CalculatorImpl) calculate(personalDeduction float64, param calculationR
 	}
 
 	tax -= param.Wht
+	taxRefund := 0.0
+	if tax < 0 {
+		taxRefund = -tax
+		tax = 0
+	}
 
 	return CalculationResultWithTaxLevel{
 		Tax:       common.Float64(tax),
+		TaxRefund: common.Float64(taxRefund),
 		TaxLevels: taxLevels,
 	}
 }
@@ -122,6 +126,7 @@ func (c *CalculatorImpl) BatchCalculate(ctx context.Context, params []calculatio
 		calculationResult := CalculationResult{
 			TotalIncome: common.Float64(v.TotalIncome),
 			Tax:         calculationResultWithTaxLevel.Tax,
+			TaxRefund:   calculationResultWithTaxLevel.TaxRefund,
 		}
 
 		calculationResults = append(calculationResults, calculationResult)
@@ -139,6 +144,19 @@ func (c *CalculatorImpl) getPersonalDeduction(ctx context.Context) float64 {
 	}
 
 	return config.Value
+}
+
+func (c *CalculatorImpl) applyAllowances(income float64, allowances []Allowance) float64 {
+	for _, v := range allowances {
+		switch v.AllowanceType {
+		case AllowanceDonation:
+			income -= min(v.Amount, 100000)
+		case AllowanceKReceipt:
+			income -= min(v.Amount, 50000)
+		}
+	}
+
+	return income
 }
 
 func createEmptyTaxLevels() []TaxLevel {
