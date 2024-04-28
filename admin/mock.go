@@ -34,6 +34,21 @@ func (m *MockAdminRepository) EXPECT() *MockAdminRepositoryMockRecorder {
 	return m.recorder
 }
 
+// UpdateKReceiptDeduction mocks base method.
+func (m *MockAdminRepository) UpdateKReceiptDeduction(ctx context.Context, kReceiptDeduction float64) (float64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateKReceiptDeduction", ctx, kReceiptDeduction)
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateKReceiptDeduction indicates an expected call of UpdateKReceiptDeduction.
+func (mr *MockAdminRepositoryMockRecorder) UpdateKReceiptDeduction(ctx, kReceiptDeduction interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateKReceiptDeduction", reflect.TypeOf((*MockAdminRepository)(nil).UpdateKReceiptDeduction), ctx, kReceiptDeduction)
+}
+
 // UpdatePersonalDeduction mocks base method.
 func (m *MockAdminRepository) UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) (float64, error) {
 	m.ctrl.T.Helper()
@@ -70,6 +85,21 @@ func NewMockAdminService(ctrl *gomock.Controller) *MockAdminService {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockAdminService) EXPECT() *MockAdminServiceMockRecorder {
 	return m.recorder
+}
+
+// UpdateKReceiptDeduction mocks base method.
+func (m *MockAdminService) UpdateKReceiptDeduction(ctx context.Context, kReceiptDeduction float64) (float64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateKReceiptDeduction", ctx, kReceiptDeduction)
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateKReceiptDeduction indicates an expected call of UpdateKReceiptDeduction.
+func (mr *MockAdminServiceMockRecorder) UpdateKReceiptDeduction(ctx, kReceiptDeduction interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateKReceiptDeduction", reflect.TypeOf((*MockAdminService)(nil).UpdateKReceiptDeduction), ctx, kReceiptDeduction)
 }
 
 // UpdatePersonalDeduction mocks base method.

@@ -59,6 +59,14 @@ func TestCalculateTax(t *testing.T) {
 						Name:  "personal_deduction",
 						Value: 60000.0,
 					}, nil)
+
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "kreceipt_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "kreceipt_deduction",
+						Value: 50000.0,
+					}, nil)
 			},
 			expected: CalculationResultWithTaxLevel{
 				Tax:       29000,
@@ -85,6 +93,14 @@ func TestCalculateTax(t *testing.T) {
 					Return(&Config{
 						Name:  "personal_deduction",
 						Value: 60000.0,
+					}, nil)
+
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "kreceipt_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "kreceipt_deduction",
+						Value: 50000.0,
 					}, nil)
 			},
 			expected: CalculationResultWithTaxLevel{
@@ -113,6 +129,14 @@ func TestCalculateTax(t *testing.T) {
 						Name:  "personal_deduction",
 						Value: 60000.0,
 					}, nil)
+
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "kreceipt_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "kreceipt_deduction",
+						Value: 50000.0,
+					}, nil)
 			},
 			expected: CalculationResultWithTaxLevel{
 				Tax:       19000,
@@ -139,6 +163,14 @@ func TestCalculateTax(t *testing.T) {
 					Return(&Config{
 						Name:  "personal_deduction",
 						Value: 60000.0,
+					}, nil)
+
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "kreceipt_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "kreceipt_deduction",
+						Value: 50000.0,
 					}, nil)
 			},
 			expected: CalculationResultWithTaxLevel{
@@ -167,6 +199,14 @@ func TestCalculateTax(t *testing.T) {
 						Name:  "personal_deduction",
 						Value: 35000.0,
 					}, nil)
+
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "kreceipt_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "kreceipt_deduction",
+						Value: 50000.0,
+					}, nil)
 			},
 			expected: CalculationResultWithTaxLevel{
 				Tax:       22500,
@@ -193,6 +233,14 @@ func TestCalculateTax(t *testing.T) {
 					Return(&Config{
 						Name:  "personal_deduction",
 						Value: 60000.0,
+					}, nil)
+
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "kreceipt_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "kreceipt_deduction",
+						Value: 50000.0,
 					}, nil)
 			},
 			expected: CalculationResultWithTaxLevel{
@@ -225,6 +273,14 @@ func TestCalculateTax(t *testing.T) {
 						Name:  "personal_deduction",
 						Value: 60000.0,
 					}, nil)
+
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "kreceipt_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "kreceipt_deduction",
+						Value: 50000.0,
+					}, nil)
 			},
 			expected: CalculationResultWithTaxLevel{
 				Tax:       0,
@@ -256,6 +312,14 @@ func TestCalculateTax(t *testing.T) {
 						Name:  "personal_deduction",
 						Value: 60000.0,
 					}, nil)
+
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "kreceipt_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "kreceipt_deduction",
+						Value: 50000.0,
+					}, nil)
 			},
 			expected: CalculationResultWithTaxLevel{
 				Tax:       0,
@@ -286,6 +350,14 @@ func TestCalculateTax(t *testing.T) {
 					Return(&Config{
 						Name:  "personal_deduction",
 						Value: 60000.0,
+					}, nil)
+
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "kreceipt_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "kreceipt_deduction",
+						Value: 50000.0,
 					}, nil)
 			},
 			expected: CalculationResultWithTaxLevel{
@@ -363,6 +435,14 @@ func TestBatchCalculate(t *testing.T) {
 					Return(&Config{
 						Name:  "personal_deduction",
 						Value: 60000.0,
+					}, nil)
+
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "kreceipt_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "kreceipt_deduction",
+						Value: 50000.0,
 					}, nil)
 			},
 			expected: BatchCalculationResult{

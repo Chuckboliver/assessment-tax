@@ -13,11 +13,24 @@ import (
 
 func main() {
 	port := os.Getenv("PORT")
-	databaseURL := os.Getenv("DATABASE_URL")
-	adminUsername := os.Getenv("ADMIN_USERNAME")
-	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	if port == "" {
+		port = "8080"
+	}
 
-	databaseURL = "postgres://postgres:postgres@localhost:5432/ktaxes?sslmode=disable"
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
+		databaseURL = "host=localhost port=5432 user=postgres password=postgres dbname=ktaxes sslmode=disable"
+	}
+
+	adminUsername := os.Getenv("ADMIN_USERNAME")
+	if adminUsername == "" {
+		adminUsername = "adminTax"
+	}
+
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	if adminPassword == "" {
+		adminPassword = "admin!"
+	}
 
 	appConfig := common.AppConfig{
 		Port:          port,
