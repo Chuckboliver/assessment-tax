@@ -19,7 +19,8 @@ const (
 )
 
 const (
-	defaultPersonalDeduction = 60000.0
+	defaultPersonalDeduction    = 60000.0
+	defaultMaxKReceiptDeduction = 50000.0
 )
 
 type CalculationResultWithTaxLevel struct {
@@ -64,10 +65,10 @@ func NewCalculator(taxConfigRepository TaxConfigRepository) Calculator {
 	}
 }
 
-func (c *CalculatorImpl) calculate(personalDeduction float64, param calculationRequest) CalculationResultWithTaxLevel {
+func (c *CalculatorImpl) calculate(personalDeduction float64, maxKReceiptDeduction float64, param calculationRequest) CalculationResultWithTaxLevel {
 	income := param.TotalIncome - personalDeduction
 
-	income = c.applyAllowances(income, param.Allowances)
+	income = c.applyAllowances(income, param.Allowances, maxKReceiptDeduction)
 
 	taxLevels := createEmptyTaxLevels()
 
@@ -113,15 +114,17 @@ func (c *CalculatorImpl) calculate(personalDeduction float64, param calculationR
 
 func (c *CalculatorImpl) Calculate(ctx context.Context, param calculationRequest) CalculationResultWithTaxLevel {
 	personalDeduction := c.getPersonalDeduction(ctx)
-	return c.calculate(personalDeduction, param)
+	maxKReceiptDeduction := c.getMaxKReceiptDeduction(ctx)
+	return c.calculate(personalDeduction, maxKReceiptDeduction, param)
 }
 
 func (c *CalculatorImpl) BatchCalculate(ctx context.Context, params []calculationRequest) BatchCalculationResult {
 	personalDeduction := c.getPersonalDeduction(ctx)
+	maxKReceiptDeduction := c.getMaxKReceiptDeduction(ctx)
 
 	calculationResults := make([]CalculationResult, 0, len(params))
 	for _, v := range params {
-		calculationResultWithTaxLevel := c.calculate(personalDeduction, v)
+		calculationResultWithTaxLevel := c.calculate(personalDeduction, maxKReceiptDeduction, v)
 
 		calculationResult := CalculationResult{
 			TotalIncome: common.Float64(v.TotalIncome),
@@ -146,13 +149,23 @@ func (c *CalculatorImpl) getPersonalDeduction(ctx context.Context) float64 {
 	return config.Value
 }
 
-func (c *CalculatorImpl) applyAllowances(income float64, allowances []Allowance) float64 {
+func (c *CalculatorImpl) getMaxKReceiptDeduction(ctx context.Context) float64 {
+	config, err := c.taxConfigRepository.FindByName(ctx, "kreceipt_deduction")
+	if err != nil {
+		return defaultMaxKReceiptDeduction
+	}
+
+	return config.Value
+}
+
+func (c *CalculatorImpl) applyAllowances(income float64, allowances []Allowance, maxKReceiptDeduction float64) float64 {
+
 	for _, v := range allowances {
 		switch v.AllowanceType {
 		case AllowanceDonation:
 			income -= min(v.Amount, 100000)
 		case AllowanceKReceipt:
-			income -= min(v.Amount, 50000)
+			income -= min(v.Amount, maxKReceiptDeduction)
 		}
 	}
 

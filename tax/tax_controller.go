@@ -36,12 +36,16 @@ type calculationRequest struct {
 func (c *TaxController) calculateTax(ctx echo.Context) error {
 	var request calculationRequest
 	if err := ctx.Bind(&request); err != nil {
-		ctx.NoContent(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, common.ErrorResponse{
+			Message: err.Error(),
+		})
 		return err
 	}
 
 	if err := ctx.Validate(&request); err != nil {
-		ctx.NoContent(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, common.ErrorResponse{
+			Message: err.Error(),
+		})
 		return err
 	}
 
@@ -52,20 +56,26 @@ func (c *TaxController) calculateTax(ctx echo.Context) error {
 func (c *TaxController) calculateTaxFromUploadedCSV(ctx echo.Context) error {
 	fileHeader, err := ctx.FormFile("taxFile")
 	if err != nil {
-		ctx.NoContent(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, common.ErrorResponse{
+			Message: err.Error(),
+		})
 		return err
 	}
 
 	multipartFile, err := fileHeader.Open()
 	if err != nil {
-		ctx.NoContent(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, common.ErrorResponse{
+			Message: err.Error(),
+		})
 		return err
 	}
 
 	parser := newCSVParser()
 	calculationRequests, err := parser.parseCalculationRequest(multipartFile)
 	if err != nil {
-		ctx.NoContent(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, common.ErrorResponse{
+			Message: err.Error(),
+		})
 		return err
 	}
 

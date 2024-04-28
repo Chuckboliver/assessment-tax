@@ -35,7 +35,7 @@ func (a *AdminController) RouteConfig(e *echo.Echo) {
 }
 
 type updatePersonalDeductionRequest struct {
-	Amount float64 `json:"amount" validate:"required"`
+	Amount float64 `json:"amount" validate:"required,lte=100000,gte=10000"`
 }
 
 type updatePersonalDeductionResponse struct {
@@ -45,12 +45,16 @@ type updatePersonalDeductionResponse struct {
 func (a *AdminController) updatePersonalDeduction(ctx echo.Context) error {
 	var request updatePersonalDeductionRequest
 	if err := ctx.Bind(&request); err != nil {
-		ctx.NoContent(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, common.ErrorResponse{
+			Message: err.Error(),
+		})
 		return err
 	}
 
 	if err := ctx.Validate(&request); err != nil {
-		ctx.NoContent(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, common.ErrorResponse{
+			Message: err.Error(),
+		})
 		return err
 	}
 
@@ -69,7 +73,7 @@ func (a *AdminController) updatePersonalDeduction(ctx echo.Context) error {
 }
 
 type updateKReceiptDeductionRequest struct {
-	Amount float64 `json:"amount" validate:"required"`
+	Amount float64 `json:"amount" validate:"required,lte=100000,gte=0"`
 }
 
 type updateKReceiptDeductionResponse struct {
@@ -79,12 +83,16 @@ type updateKReceiptDeductionResponse struct {
 func (a *AdminController) updateKReceiptDeduction(ctx echo.Context) error {
 	var request updateKReceiptDeductionRequest
 	if err := ctx.Bind(&request); err != nil {
-		ctx.NoContent(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, common.ErrorResponse{
+			Message: err.Error(),
+		})
 		return err
 	}
 
 	if err := ctx.Validate(&request); err != nil {
-		ctx.NoContent(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, common.ErrorResponse{
+			Message: err.Error(),
+		})
 		return err
 	}
 

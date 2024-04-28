@@ -25,11 +25,11 @@ func TestPostUpdatePersonalDeduction(t *testing.T) {
 			name: "Should response with 200 status code, given valid request",
 			body: `
 				{
-					"amount": 20000.0
+					"amount": 100000.0
 				}
 			`,
 			adminServiceStub: func(adminService *MockAdminService) {
-				adminService.EXPECT().UpdatePersonalDeduction(gomock.Any(), 20000.0).Times(1).Return(20000.0, nil)
+				adminService.EXPECT().UpdatePersonalDeduction(gomock.Any(), 100000.0).Times(1).Return(100000.0, nil)
 			},
 			expectedStatusCode: http.StatusOK,
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -40,7 +40,7 @@ func TestPostUpdatePersonalDeduction(t *testing.T) {
 				err = json.Unmarshal(responseBody, &actualResponse)
 				require.NoError(t, err)
 
-				require.Equal(t, common.Float64(20000.0), actualResponse.PersonalDeduction)
+				require.Equal(t, common.Float64(100000.0), actualResponse.PersonalDeduction)
 			},
 		},
 		{
@@ -48,6 +48,19 @@ func TestPostUpdatePersonalDeduction(t *testing.T) {
 			body: `
 				{
 					"invalid": null
+				}
+			`,
+			adminServiceStub: func(adminService *MockAdminService) {
+				adminService.EXPECT().UpdatePersonalDeduction(gomock.Any(), gomock.Any()).Times(0)
+			},
+			expectedStatusCode: http.StatusBadRequest,
+			checkResponse:      func(t *testing.T, recorder *httptest.ResponseRecorder) {},
+		},
+		{
+			name: "Should response with 400 status code, given amount greater than 100000",
+			body: `
+				{
+					"amount": 100000.1
 				}
 			`,
 			adminServiceStub: func(adminService *MockAdminService) {
@@ -105,11 +118,11 @@ func TestPostUpdateKReceiptDeduction(t *testing.T) {
 			name: "Should response with 200 status code, given valid request",
 			body: `
 				{
-					"amount": 20000.0
+					"amount": 100000.0
 				}
 			`,
 			adminServiceStub: func(adminService *MockAdminService) {
-				adminService.EXPECT().UpdateKReceiptDeduction(gomock.Any(), 20000.0).Times(1).Return(20000.0, nil)
+				adminService.EXPECT().UpdateKReceiptDeduction(gomock.Any(), 100000.0).Times(1).Return(100000.0, nil)
 			},
 			expectedStatusCode: http.StatusOK,
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -120,7 +133,7 @@ func TestPostUpdateKReceiptDeduction(t *testing.T) {
 				err = json.Unmarshal(responseBody, &actualResponse)
 				require.NoError(t, err)
 
-				require.Equal(t, common.Float64(20000.0), actualResponse.KReceipt)
+				require.Equal(t, common.Float64(100000.0), actualResponse.KReceipt)
 			},
 		},
 		{
@@ -128,6 +141,19 @@ func TestPostUpdateKReceiptDeduction(t *testing.T) {
 			body: `
 				{
 					"invalid": null
+				}
+			`,
+			adminServiceStub: func(adminService *MockAdminService) {
+				adminService.EXPECT().UpdateKReceiptDeduction(gomock.Any(), gomock.Any()).Times(0)
+			},
+			expectedStatusCode: http.StatusBadRequest,
+			checkResponse:      func(t *testing.T, recorder *httptest.ResponseRecorder) {},
+		},
+		{
+			name: "Should response with 400 status code, given k-receipt greater than 100000",
+			body: `
+				{
+					"amount": 100000.1
 				}
 			`,
 			adminServiceStub: func(adminService *MockAdminService) {

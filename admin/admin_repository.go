@@ -20,7 +20,7 @@ func NewAdminRepository(db sqlx.ExtContext) AdminRepository {
 
 func (r *adminRepository) UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) (float64, error) {
 	sql := `
-		UDPATE tax_config
+		UPDATE tax_config
 		SET
 			value = $1
 		WHERE name = 'personal_deduction'
@@ -39,7 +39,7 @@ func (r *adminRepository) UpdatePersonalDeduction(ctx context.Context, personalD
 // UpdateKReceiptDeduction implements AdminRepository.
 func (r *adminRepository) UpdateKReceiptDeduction(ctx context.Context, kReceiptDeduction float64) (float64, error) {
 	sql := `
-		UDPATE tax_config
+		UPDATE tax_config
 		SET
 			value = $1
 		WHERE name = 'kreceipt_deduction'

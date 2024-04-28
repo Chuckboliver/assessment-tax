@@ -3,6 +3,7 @@ package app
 import (
 	"log/slog"
 
+	"github.com/chuckboliver/assessment-tax/admin"
 	"github.com/chuckboliver/assessment-tax/common"
 	"github.com/chuckboliver/assessment-tax/postgres"
 	"github.com/chuckboliver/assessment-tax/tax"
@@ -20,9 +21,13 @@ func New(config common.AppConfig) (*echo.Echo, error) {
 	taxCalculator := tax.NewCalculator(taxConfigRepo)
 	taxController := tax.NewTaxController(taxCalculator)
 
+	adminRepo := admin.NewAdminRepository(db)
+	adminService := admin.NewAdminService(adminRepo)
+	adminController := admin.NewAdminController(adminService, config)
+
 	e := common.NewConfiguredEcho()
 
-	configureController(e, &taxController)
+	configureController(e, &taxController, &adminController)
 
 	return e, nil
 }
