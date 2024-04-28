@@ -48,6 +48,7 @@ func TestPostCalculateTax(t *testing.T) {
 			`,
 			expected: CalculationResultWithTaxLevel{
 				Tax:       29000,
+				TaxRefund: 0,
 				TaxLevels: taxLevels1,
 			},
 		},
@@ -67,6 +68,7 @@ func TestPostCalculateTax(t *testing.T) {
 			`,
 			expected: CalculationResultWithTaxLevel{
 				Tax:       4000,
+				TaxRefund: 0,
 				TaxLevels: taxLevels2,
 			},
 		},
@@ -86,6 +88,7 @@ func TestPostCalculateTax(t *testing.T) {
 			`,
 			expected: CalculationResultWithTaxLevel{
 				Tax:       19000,
+				TaxRefund: 0,
 				TaxLevels: taxLevels3,
 			},
 		},
@@ -105,6 +108,27 @@ func TestPostCalculateTax(t *testing.T) {
 			`,
 			expected: CalculationResultWithTaxLevel{
 				Tax:       20000,
+				TaxRefund: 0,
+				TaxLevels: taxLevels4,
+			},
+		},
+		{
+			name: "Should calculate tax refund correctly, when witholding tax is more than tax",
+			body: `
+				{
+					"totalIncome": 500000,
+					"wht": 25321,
+					"allowances": [
+						{
+							"allowanceType": "donation",
+							"amount": 90000
+						}
+					]
+				}
+			`,
+			expected: CalculationResultWithTaxLevel{
+				Tax:       0,
+				TaxRefund: 5321,
 				TaxLevels: taxLevels4,
 			},
 		},
@@ -148,6 +172,7 @@ func TestPostCalculateTax(t *testing.T) {
 			require.NoError(t, err)
 
 			require.Equal(t, tc.expected.Tax, gotCalculationResult.Tax)
+			require.Equal(t, tc.expected.TaxRefund, gotCalculationResult.TaxRefund)
 			require.Equal(t, tc.expected.TaxLevels, gotCalculationResult.TaxLevels)
 		})
 	}
