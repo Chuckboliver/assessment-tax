@@ -5,10 +5,49 @@
 package tax
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
 )
+
+// MockTaxConfigRepository is a mock of TaxConfigRepository interface.
+type MockTaxConfigRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockTaxConfigRepositoryMockRecorder
+}
+
+// MockTaxConfigRepositoryMockRecorder is the mock recorder for MockTaxConfigRepository.
+type MockTaxConfigRepositoryMockRecorder struct {
+	mock *MockTaxConfigRepository
+}
+
+// NewMockTaxConfigRepository creates a new mock instance.
+func NewMockTaxConfigRepository(ctrl *gomock.Controller) *MockTaxConfigRepository {
+	mock := &MockTaxConfigRepository{ctrl: ctrl}
+	mock.recorder = &MockTaxConfigRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTaxConfigRepository) EXPECT() *MockTaxConfigRepositoryMockRecorder {
+	return m.recorder
+}
+
+// FindByName mocks base method.
+func (m *MockTaxConfigRepository) FindByName(ctx context.Context, name string) (*Config, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByName", ctx, name)
+	ret0, _ := ret[0].(*Config)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByName indicates an expected call of FindByName.
+func (mr *MockTaxConfigRepositoryMockRecorder) FindByName(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByName", reflect.TypeOf((*MockTaxConfigRepository)(nil).FindByName), ctx, name)
+}
 
 // MockCalculator is a mock of Calculator interface.
 type MockCalculator struct {
@@ -34,15 +73,30 @@ func (m *MockCalculator) EXPECT() *MockCalculatorMockRecorder {
 }
 
 // Calculate mocks base method.
-func (m *MockCalculator) Calculate(param CalculationRequest) CalculationResult {
+func (m *MockCalculator) Calculate(ctx context.Context, param calculationRequest) CalculationResult {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Calculate", param)
+	ret := m.ctrl.Call(m, "Calculate", ctx, param)
 	ret0, _ := ret[0].(CalculationResult)
 	return ret0
 }
 
 // Calculate indicates an expected call of Calculate.
-func (mr *MockCalculatorMockRecorder) Calculate(param interface{}) *gomock.Call {
+func (mr *MockCalculatorMockRecorder) Calculate(ctx, param interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Calculate", reflect.TypeOf((*MockCalculator)(nil).Calculate), param)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Calculate", reflect.TypeOf((*MockCalculator)(nil).Calculate), ctx, param)
+}
+
+// GetPersonalDeduction mocks base method.
+func (m *MockCalculator) GetPersonalDeduction(ctx context.Context) (float64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPersonalDeduction", ctx)
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPersonalDeduction indicates an expected call of GetPersonalDeduction.
+func (mr *MockCalculatorMockRecorder) GetPersonalDeduction(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPersonalDeduction", reflect.TypeOf((*MockCalculator)(nil).GetPersonalDeduction), ctx)
 }

@@ -1,17 +1,42 @@
 package main
 
 import (
+	"fmt"
+	"log/slog"
 	"net/http"
+	"os"
 
-	"github.com/chuckboliver/assessment-tax/server"
+	"github.com/chuckboliver/assessment-tax/app"
+	"github.com/chuckboliver/assessment-tax/common"
 	"github.com/labstack/echo/v4"
 )
 
 func main() {
-	e := server.New()
+	port := os.Getenv("PORT")
+	databaseURL := os.Getenv("DATABASE_URL")
+	adminUsername := os.Getenv("ADMIN_USERNAME")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+
+	databaseURL = "postgres://postgres:postgres@localhost:5432/ktaxes?sslmode=disable"
+
+	appConfig := common.AppConfig{
+		Port:          port,
+		DatabaseURL:   databaseURL,
+		AdminUsername: adminUsername,
+		AdminPassword: adminPassword,
+	}
+
+	e, err := app.New(appConfig)
+	if err != nil {
+		slog.Error("Failed to create new echo server", err)
+		os.Exit(1)
+	}
+
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
 	})
 
-	e.Logger.Fatal(e.Start(":1323"))
+	address := fmt.Sprintf("0.0.0.0:%s", appConfig.Port)
+
+	e.Logger.Fatal(e.Start(address))
 }
