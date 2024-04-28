@@ -27,6 +27,12 @@ func TestCalculateTax(t *testing.T) {
 	taxLevels6 := createEmptyTaxLevels()
 	taxLevels6[1].Tax = 20000
 
+	taxLevels7 := createEmptyTaxLevels()
+	taxLevels7[1].Tax = 17000
+
+	taxLevels8 := createEmptyTaxLevels()
+	taxLevels8[1].Tax = 15000
+
 	testCases := []struct {
 		name              string
 		arg               calculationRequest
@@ -169,7 +175,7 @@ func TestCalculateTax(t *testing.T) {
 			},
 		},
 		{
-			name: "Should calculate tax correctly, given total income and donation (under allowance limit of 100000)",
+			name: "Should calculate tax refund correctly, when withholding tax is more than calculated tax",
 			arg: calculationRequest{
 				TotalIncome: 500000,
 				Wht:         30000,
@@ -193,6 +199,99 @@ func TestCalculateTax(t *testing.T) {
 				Tax:       0,
 				TaxRefund: 10000,
 				TaxLevels: taxLevels6,
+			},
+		},
+		{
+			name: "Should calculate tax correctly, given allowance type of k-receipt",
+			arg: calculationRequest{
+				TotalIncome: 500000,
+				Wht:         21000,
+				Allowances: []Allowance{
+					{
+						AllowanceType: AllowanceDonation,
+						Amount:        90000,
+					},
+					{
+						AllowanceType: AllowanceKReceipt,
+						Amount:        30000,
+					},
+				},
+			},
+			taxConfigRepoStub: func(taxConfigRepo *MockTaxConfigRepository) {
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "personal_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "personal_deduction",
+						Value: 60000.0,
+					}, nil)
+			},
+			expected: CalculationResultWithTaxLevel{
+				Tax:       0,
+				TaxRefund: 4000,
+				TaxLevels: taxLevels7,
+			},
+		},
+		{
+			name: "Should calculate tax correctly, given allowance type of k-receipt (over allowance limit of 50000)",
+			arg: calculationRequest{
+				TotalIncome: 500000,
+				Wht:         15000,
+				Allowances: []Allowance{
+					{
+						AllowanceType: AllowanceDonation,
+						Amount:        90000,
+					},
+					{
+						AllowanceType: AllowanceKReceipt,
+						Amount:        60000,
+					},
+				},
+			},
+			taxConfigRepoStub: func(taxConfigRepo *MockTaxConfigRepository) {
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "personal_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "personal_deduction",
+						Value: 60000.0,
+					}, nil)
+			},
+			expected: CalculationResultWithTaxLevel{
+				Tax:       0,
+				TaxRefund: 0,
+				TaxLevels: taxLevels8,
+			},
+		},
+		{
+			name: "Should calculate tax correctly, given allowance type of k-receipt (equal to allowance limit of 50000)",
+			arg: calculationRequest{
+				TotalIncome: 500000,
+				Wht:         15000,
+				Allowances: []Allowance{
+					{
+						AllowanceType: AllowanceDonation,
+						Amount:        90000,
+					},
+					{
+						AllowanceType: AllowanceKReceipt,
+						Amount:        50000,
+					},
+				},
+			},
+			taxConfigRepoStub: func(taxConfigRepo *MockTaxConfigRepository) {
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "personal_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "personal_deduction",
+						Value: 60000.0,
+					}, nil)
+			},
+			expected: CalculationResultWithTaxLevel{
+				Tax:       0,
+				TaxRefund: 0,
+				TaxLevels: taxLevels8,
 			},
 		},
 	}
