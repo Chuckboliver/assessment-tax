@@ -35,3 +35,22 @@ func (r *adminRepository) UpdatePersonalDeduction(ctx context.Context, personalD
 	}
 	return updatedPersonalDeduction, nil
 }
+
+// UpdateKReceiptDeduction implements AdminRepository.
+func (r *adminRepository) UpdateKReceiptDeduction(ctx context.Context, kReceiptDeduction float64) (float64, error) {
+	sql := `
+		UDPATE tax_config
+		SET
+			value = $1
+		WHERE name = 'kreceipt_deduction'
+		RETURNING value
+	`
+
+	row := r.db.QueryRowxContext(ctx, sql, kReceiptDeduction)
+
+	var updatedKReceiptDeduction float64
+	if err := row.Scan(&updatedKReceiptDeduction); err != nil {
+		return 0, err
+	}
+	return updatedKReceiptDeduction, nil
+}
