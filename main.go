@@ -15,7 +15,7 @@ func main() {
 	port := os.Getenv("PORT")
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
-		databaseURL = "postgres://postgres:postgres@localhost:5432/ktaxes?sslmode=disable"
+		databaseURL = "host=localhost port=5432 user=postgres password=postgres dbname=ktaxes sslmode=disable"
 	}
 
 	adminUsername := os.Getenv("ADMIN_USERNAME")
