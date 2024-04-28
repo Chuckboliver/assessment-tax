@@ -25,12 +25,16 @@ func (a *AdminController) RouteConfig(e *echo.Echo) {
 	e.POST("/admin/deductions/personal", a.updatePersonalDeduction)
 }
 
-type personalDeductionRequest struct {
+type updatePersonalDeductionRequest struct {
 	Amount float64 `json:"amount" validate:"required"`
 }
 
+type updatePersonalDeductionResponse struct {
+	PersonalDeduction common.Float64 `json:"personalDeduction"`
+}
+
 func (a *AdminController) updatePersonalDeduction(ctx echo.Context) error {
-	var request personalDeductionRequest
+	var request updatePersonalDeductionRequest
 	if err := ctx.Bind(&request); err != nil {
 		slog.Error("Failed to bind request", err)
 		ctx.NoContent(http.StatusBadRequest)
@@ -43,12 +47,16 @@ func (a *AdminController) updatePersonalDeduction(ctx echo.Context) error {
 		return err
 	}
 
-	err := a.adminService.UpdatePersonalDeduction(ctx.Request().Context(), request.Amount)
+	updatedPersonalDeduction, err := a.adminService.UpdatePersonalDeduction(ctx.Request().Context(), request.Amount)
 	if err != nil {
 		slog.Error("Failed to update personal deduction", err)
 		ctx.NoContent(http.StatusInternalServerError)
 		return err
 	}
 
-	return ctx.NoContent(http.StatusOK)
+	response := updatePersonalDeductionResponse{
+		PersonalDeduction: common.Float64(updatedPersonalDeduction),
+	}
+
+	return ctx.JSON(http.StatusOK, response)
 }

@@ -5,11 +5,11 @@ import (
 )
 
 type AdminRepository interface {
-	UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) error
+	UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) (float64, error)
 }
 
 type AdminService interface {
-	UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) error
+	UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) (float64, error)
 }
 
 var _ AdminService = (*adminService)(nil)
@@ -24,6 +24,6 @@ func NewAdminService(adminRepository AdminRepository) AdminService {
 	}
 }
 
-func (a *adminService) UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) error {
+func (a *adminService) UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) (float64, error) {
 	return a.adminRepository.UpdatePersonalDeduction(ctx, personalDeduction)
 }

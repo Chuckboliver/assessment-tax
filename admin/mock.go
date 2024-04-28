@@ -35,11 +35,12 @@ func (m *MockAdminRepository) EXPECT() *MockAdminRepositoryMockRecorder {
 }
 
 // UpdatePersonalDeduction mocks base method.
-func (m *MockAdminRepository) UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) error {
+func (m *MockAdminRepository) UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) (float64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdatePersonalDeduction", ctx, personalDeduction)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdatePersonalDeduction indicates an expected call of UpdatePersonalDeduction.
@@ -72,11 +73,12 @@ func (m *MockAdminService) EXPECT() *MockAdminServiceMockRecorder {
 }
 
 // UpdatePersonalDeduction mocks base method.
-func (m *MockAdminService) UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) error {
+func (m *MockAdminService) UpdatePersonalDeduction(ctx context.Context, personalDeduction float64) (float64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdatePersonalDeduction", ctx, personalDeduction)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdatePersonalDeduction indicates an expected call of UpdatePersonalDeduction.

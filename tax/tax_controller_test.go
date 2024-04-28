@@ -30,7 +30,7 @@ func TestPostCalculateTax(t *testing.T) {
 	testCases := []struct {
 		name     string
 		body     string
-		expected CalculationResult
+		expected CalculationResultWithTaxLevel
 	}{
 		{
 			name: "calculate tax correctly, given only total income",
@@ -46,7 +46,7 @@ func TestPostCalculateTax(t *testing.T) {
 					]
 				}
 			`,
-			expected: CalculationResult{
+			expected: CalculationResultWithTaxLevel{
 				Tax:       29000,
 				TaxLevels: taxLevels1,
 			},
@@ -65,7 +65,7 @@ func TestPostCalculateTax(t *testing.T) {
 					]
 				}
 			`,
-			expected: CalculationResult{
+			expected: CalculationResultWithTaxLevel{
 				Tax:       4000,
 				TaxLevels: taxLevels2,
 			},
@@ -84,7 +84,7 @@ func TestPostCalculateTax(t *testing.T) {
 					]
 				}
 			`,
-			expected: CalculationResult{
+			expected: CalculationResultWithTaxLevel{
 				Tax:       19000,
 				TaxLevels: taxLevels3,
 			},
@@ -103,7 +103,7 @@ func TestPostCalculateTax(t *testing.T) {
 					]
 				}
 			`,
-			expected: CalculationResult{
+			expected: CalculationResultWithTaxLevel{
 				Tax:       20000,
 				TaxLevels: taxLevels4,
 			},
@@ -143,7 +143,7 @@ func TestPostCalculateTax(t *testing.T) {
 			responseBytes, err := io.ReadAll(response)
 			require.NoError(t, err)
 
-			var gotCalculationResult CalculationResult
+			var gotCalculationResult CalculationResultWithTaxLevel
 			err = json.Unmarshal(responseBytes, &gotCalculationResult)
 			require.NoError(t, err)
 

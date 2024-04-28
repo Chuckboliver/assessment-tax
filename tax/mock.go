@@ -72,11 +72,25 @@ func (m *MockCalculator) EXPECT() *MockCalculatorMockRecorder {
 	return m.recorder
 }
 
+// BatchCalculate mocks base method.
+func (m *MockCalculator) BatchCalculate(ctx context.Context, params []calculationRequest) BatchCalculationResult {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BatchCalculate", ctx, params)
+	ret0, _ := ret[0].(BatchCalculationResult)
+	return ret0
+}
+
+// BatchCalculate indicates an expected call of BatchCalculate.
+func (mr *MockCalculatorMockRecorder) BatchCalculate(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchCalculate", reflect.TypeOf((*MockCalculator)(nil).BatchCalculate), ctx, params)
+}
+
 // Calculate mocks base method.
-func (m *MockCalculator) Calculate(ctx context.Context, param calculationRequest) CalculationResult {
+func (m *MockCalculator) Calculate(ctx context.Context, param calculationRequest) CalculationResultWithTaxLevel {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Calculate", ctx, param)
-	ret0, _ := ret[0].(CalculationResult)
+	ret0, _ := ret[0].(CalculationResultWithTaxLevel)
 	return ret0
 }
 
@@ -84,19 +98,4 @@ func (m *MockCalculator) Calculate(ctx context.Context, param calculationRequest
 func (mr *MockCalculatorMockRecorder) Calculate(ctx, param interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Calculate", reflect.TypeOf((*MockCalculator)(nil).Calculate), ctx, param)
-}
-
-// GetPersonalDeduction mocks base method.
-func (m *MockCalculator) GetPersonalDeduction(ctx context.Context) (float64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPersonalDeduction", ctx)
-	ret0, _ := ret[0].(float64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetPersonalDeduction indicates an expected call of GetPersonalDeduction.
-func (mr *MockCalculatorMockRecorder) GetPersonalDeduction(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPersonalDeduction", reflect.TypeOf((*MockCalculator)(nil).GetPersonalDeduction), ctx)
 }
