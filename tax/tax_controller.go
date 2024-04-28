@@ -38,6 +38,11 @@ func (c *TaxController) calculateTax(ctx echo.Context) error {
 		return err
 	}
 
+	if err := ctx.Validate(&request); err != nil {
+		ctx.NoContent(http.StatusBadRequest)
+		return err
+	}
+
 	result := c.taxCalculator.Calculate(ctx.Request().Context(), request)
 	return ctx.JSON(http.StatusOK, result)
 }
