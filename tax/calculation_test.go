@@ -28,7 +28,7 @@ func TestCalculateTax(t *testing.T) {
 		name              string
 		arg               calculationRequest
 		taxConfigRepoStub func(taxConfigRepo *MockTaxConfigRepository)
-		expected          CalculationResult
+		expected          CalculationResultWithTaxLevel
 	}{
 		{
 			name: "Should calculate tax correctly, given only total income",
@@ -51,7 +51,7 @@ func TestCalculateTax(t *testing.T) {
 						Value: 60000.0,
 					}, nil)
 			},
-			expected: CalculationResult{
+			expected: CalculationResultWithTaxLevel{
 				Tax:       29000,
 				TaxLevels: taxLevels1,
 			},
@@ -77,7 +77,7 @@ func TestCalculateTax(t *testing.T) {
 						Value: 60000.0,
 					}, nil)
 			},
-			expected: CalculationResult{
+			expected: CalculationResultWithTaxLevel{
 				Tax:       4000,
 				TaxLevels: taxLevels2,
 			},
@@ -103,7 +103,7 @@ func TestCalculateTax(t *testing.T) {
 						Value: 60000.0,
 					}, nil)
 			},
-			expected: CalculationResult{
+			expected: CalculationResultWithTaxLevel{
 				Tax:       19000,
 				TaxLevels: taxLevels3,
 			},
@@ -129,7 +129,7 @@ func TestCalculateTax(t *testing.T) {
 						Value: 60000.0,
 					}, nil)
 			},
-			expected: CalculationResult{
+			expected: CalculationResultWithTaxLevel{
 				Tax:       20000,
 				TaxLevels: taxLevels4,
 			},
@@ -155,7 +155,7 @@ func TestCalculateTax(t *testing.T) {
 						Value: 35000.0,
 					}, nil)
 			},
-			expected: CalculationResult{
+			expected: CalculationResultWithTaxLevel{
 				Tax:       22500,
 				TaxLevels: taxLevels5,
 			},
@@ -176,6 +176,97 @@ func TestCalculateTax(t *testing.T) {
 
 			require.Equal(t, tc.expected.Tax, result.Tax)
 			require.Equal(t, tc.expected.TaxLevels, result.TaxLevels)
+		})
+	}
+}
+
+func TestBatchCalculate(t *testing.T) {
+	testCases := []struct {
+		name              string
+		arg               []calculationRequest
+		taxConfigRepoStub func(taxConfigRepo *MockTaxConfigRepository)
+		expected          BatchCalculationResult
+	}{
+		{
+			name: "Should calculate tax for batch input correctly",
+			arg: []calculationRequest{
+				{
+					TotalIncome: 500000,
+					Wht:         0,
+					Allowances: []Allowance{
+						{
+							AllowanceType: AllowanceDonation,
+							Amount:        0,
+						},
+					},
+				},
+				{
+					TotalIncome: 600000,
+					Wht:         40000,
+					Allowances: []Allowance{
+						{
+							AllowanceType: AllowanceDonation,
+							Amount:        20000,
+						},
+					},
+				},
+				{
+					TotalIncome: 750000,
+					Wht:         50000,
+					Allowances: []Allowance{
+						{
+							AllowanceType: AllowanceDonation,
+							Amount:        15000,
+						},
+					},
+				},
+			},
+			taxConfigRepoStub: func(taxConfigRepo *MockTaxConfigRepository) {
+				taxConfigRepo.EXPECT().
+					FindByName(gomock.Any(), "personal_deduction").
+					Times(1).
+					Return(&Config{
+						Name:  "personal_deduction",
+						Value: 60000.0,
+					}, nil)
+			},
+			expected: BatchCalculationResult{
+				Taxes: []CalculationResult{
+					{
+						TotalIncome: 500000,
+						Tax:         29000,
+					},
+					{
+						TotalIncome: 600000,
+						Tax:         0,
+					},
+					{
+						TotalIncome: 750000,
+						Tax:         28750,
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+
+			taxConfigRepo := NewMockTaxConfigRepository(ctrl)
+			calculator := NewCalculator(taxConfigRepo)
+
+			tc.taxConfigRepoStub(taxConfigRepo)
+
+			ctx := context.Background()
+			result := calculator.BatchCalculate(ctx, tc.arg)
+
+			require.Equal(t, len(tc.expected.Taxes), len(result.Taxes))
+
+			for i := 0; i < len(tc.expected.Taxes); i++ {
+				require.Equal(t, tc.expected.Taxes[i].TotalIncome, result.Taxes[i].TotalIncome)
+				require.Equal(t, tc.expected.Taxes[i].Tax, result.Taxes[i].Tax)
+			}
 		})
 	}
 }

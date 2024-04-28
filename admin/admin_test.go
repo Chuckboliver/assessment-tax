@@ -13,8 +13,9 @@ func TestUpdatePersonalDeduction(t *testing.T) {
 	adminRepo := NewMockAdminRepository(ctrl)
 	adminService := NewAdminService(adminRepo)
 
-	adminRepo.EXPECT().UpdatePersonalDeduction(gomock.Any(), 20000.0).Times(1).Return(nil)
+	adminRepo.EXPECT().UpdatePersonalDeduction(gomock.Any(), 20000.0).Times(1).Return(20000.0, nil)
 
-	err := adminService.UpdatePersonalDeduction(context.Background(), 20000.0)
+	updatePersonalDeduction, err := adminService.UpdatePersonalDeduction(context.Background(), 20000.0)
 	require.NoError(t, err)
+	require.Equal(t, 20000.0, updatePersonalDeduction)
 }

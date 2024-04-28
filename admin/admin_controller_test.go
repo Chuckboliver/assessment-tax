@@ -17,6 +17,7 @@ func TestPostUpdatePersonalDeduction(t *testing.T) {
 		body               string
 		adminServiceStub   func(adminService *MockAdminService)
 		expectedStatusCode int
+		expectedBody       updatePersonalDeductionResponse
 	}{
 		{
 			name: "Should response with 200 status code, given valid request",
@@ -26,9 +27,12 @@ func TestPostUpdatePersonalDeduction(t *testing.T) {
 				}
 			`,
 			adminServiceStub: func(adminService *MockAdminService) {
-				adminService.EXPECT().UpdatePersonalDeduction(gomock.Any(), 20000.0).Times(1).Return(nil)
+				adminService.EXPECT().UpdatePersonalDeduction(gomock.Any(), 20000.0).Times(1).Return(20000.0, nil)
 			},
 			expectedStatusCode: http.StatusOK,
+			expectedBody: updatePersonalDeductionResponse{
+				PersonalDeduction: 20000,
+			},
 		},
 		{
 			name: "Should response with 400 status code, given invalid request",

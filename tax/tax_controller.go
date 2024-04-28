@@ -1,7 +1,6 @@
 package tax
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/chuckboliver/assessment-tax/common"
@@ -21,7 +20,11 @@ func NewTaxController(taxCalculator Calculator) TaxController {
 }
 
 func (c *TaxController) RouteConfig(e *echo.Echo) {
-	e.POST("/tax/calculations", c.calculateTax)
+	group := e.Group("/tax/calculations")
+	{
+		group.POST("", c.calculateTax)
+		group.POST("/upload-csv", c.calculateTaxFromUploadedCSV)
+	}
 }
 
 type calculationRequest struct {
@@ -33,7 +36,6 @@ type calculationRequest struct {
 func (c *TaxController) calculateTax(ctx echo.Context) error {
 	var request calculationRequest
 	if err := ctx.Bind(&request); err != nil {
-		slog.Error("Failed to bind request", err)
 		ctx.NoContent(http.StatusBadRequest)
 		return err
 	}
@@ -44,5 +46,29 @@ func (c *TaxController) calculateTax(ctx echo.Context) error {
 	}
 
 	result := c.taxCalculator.Calculate(ctx.Request().Context(), request)
+	return ctx.JSON(http.StatusOK, result)
+}
+
+func (c *TaxController) calculateTaxFromUploadedCSV(ctx echo.Context) error {
+	fileHeader, err := ctx.FormFile("taxFile")
+	if err != nil {
+		ctx.NoContent(http.StatusBadRequest)
+		return err
+	}
+
+	multipartFile, err := fileHeader.Open()
+	if err != nil {
+		ctx.NoContent(http.StatusBadRequest)
+		return err
+	}
+
+	parser := newCSVParser()
+	calculationRequests, err := parser.parseCalculationRequest(multipartFile)
+	if err != nil {
+		ctx.NoContent(http.StatusBadRequest)
+		return err
+	}
+
+	result := c.taxCalculator.BatchCalculate(ctx.Request().Context(), calculationRequests)
 	return ctx.JSON(http.StatusOK, result)
 }

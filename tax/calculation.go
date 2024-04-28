@@ -21,9 +21,18 @@ const (
 	defaultPersonalDeduction = 60000.0
 )
 
-type CalculationResult struct {
+type CalculationResultWithTaxLevel struct {
 	Tax       common.Float64 `json:"tax"`
 	TaxLevels []TaxLevel     `json:"taxLevel"`
+}
+
+type BatchCalculationResult struct {
+	Taxes []CalculationResult `json:"taxes"`
+}
+
+type CalculationResult struct {
+	TotalIncome common.Float64 `json:"totalIncome"`
+	Tax         common.Float64 `json:"tax"`
 }
 
 type TaxLevel struct {
@@ -36,8 +45,8 @@ type TaxConfigRepository interface {
 }
 
 type Calculator interface {
-	Calculate(ctx context.Context, param calculationRequest) CalculationResult
-	GetPersonalDeduction(ctx context.Context) (float64, error)
+	Calculate(ctx context.Context, param calculationRequest) CalculationResultWithTaxLevel
+	BatchCalculate(ctx context.Context, params []calculationRequest) BatchCalculationResult
 }
 
 var _ Calculator = (*CalculatorImpl)(nil)
@@ -52,13 +61,7 @@ func NewCalculator(taxConfigRepository TaxConfigRepository) Calculator {
 	}
 }
 
-func (c *CalculatorImpl) Calculate(ctx context.Context, param calculationRequest) CalculationResult {
-	var personalDeduction float64
-	personalDeduction, err := c.GetPersonalDeduction(ctx)
-	if err != nil {
-		personalDeduction = defaultPersonalDeduction
-	}
-
+func (c *CalculatorImpl) calculate(personalDeduction float64, param calculationRequest) CalculationResultWithTaxLevel {
 	income := param.TotalIncome - personalDeduction
 
 	for _, v := range param.Allowances {
@@ -98,19 +101,44 @@ func (c *CalculatorImpl) Calculate(ctx context.Context, param calculationRequest
 
 	tax -= param.Wht
 
-	return CalculationResult{
+	return CalculationResultWithTaxLevel{
 		Tax:       common.Float64(tax),
 		TaxLevels: taxLevels,
 	}
 }
 
-func (c *CalculatorImpl) GetPersonalDeduction(ctx context.Context) (float64, error) {
-	config, err := c.taxConfigRepository.FindByName(ctx, "personal_deduction")
-	if err != nil {
-		return 0, err
+func (c *CalculatorImpl) Calculate(ctx context.Context, param calculationRequest) CalculationResultWithTaxLevel {
+	personalDeduction := c.getPersonalDeduction(ctx)
+	return c.calculate(personalDeduction, param)
+}
+
+func (c *CalculatorImpl) BatchCalculate(ctx context.Context, params []calculationRequest) BatchCalculationResult {
+	personalDeduction := c.getPersonalDeduction(ctx)
+
+	calculationResults := make([]CalculationResult, 0, len(params))
+	for _, v := range params {
+		calculationResultWithTaxLevel := c.calculate(personalDeduction, v)
+
+		calculationResult := CalculationResult{
+			TotalIncome: common.Float64(v.TotalIncome),
+			Tax:         calculationResultWithTaxLevel.Tax,
+		}
+
+		calculationResults = append(calculationResults, calculationResult)
 	}
 
-	return config.Value, nil
+	return BatchCalculationResult{
+		Taxes: calculationResults,
+	}
+}
+
+func (c *CalculatorImpl) getPersonalDeduction(ctx context.Context) float64 {
+	config, err := c.taxConfigRepository.FindByName(ctx, "personal_deduction")
+	if err != nil {
+		return defaultPersonalDeduction
+	}
+
+	return config.Value
 }
 
 func createEmptyTaxLevels() []TaxLevel {
