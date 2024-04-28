@@ -28,7 +28,7 @@ func (t *taxConfigPostgresRepository) FindByName(ctx context.Context, name strin
 	row := t.db.QueryRowxContext(ctx, sql, name)
 
 	var config Config
-	if err := row.Scan(&config); err != nil {
+	if err := row.Scan(&config.Name, &config.Value); err != nil {
 		return nil, err
 	}
 

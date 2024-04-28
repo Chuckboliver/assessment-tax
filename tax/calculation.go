@@ -2,6 +2,7 @@ package tax
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/chuckboliver/assessment-tax/common"
 )
@@ -143,6 +144,7 @@ func (c *CalculatorImpl) BatchCalculate(ctx context.Context, params []calculatio
 func (c *CalculatorImpl) getPersonalDeduction(ctx context.Context) float64 {
 	config, err := c.taxConfigRepository.FindByName(ctx, "personal_deduction")
 	if err != nil {
+		slog.Error("failed to get personal deduction", err)
 		return defaultPersonalDeduction
 	}
 
@@ -152,6 +154,7 @@ func (c *CalculatorImpl) getPersonalDeduction(ctx context.Context) float64 {
 func (c *CalculatorImpl) getMaxKReceiptDeduction(ctx context.Context) float64 {
 	config, err := c.taxConfigRepository.FindByName(ctx, "kreceipt_deduction")
 	if err != nil {
+		slog.Error("failed to get max kreceipt deduction", err)
 		return defaultMaxKReceiptDeduction
 	}
 

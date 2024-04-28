@@ -13,6 +13,10 @@ import (
 
 func main() {
 	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
 		databaseURL = "host=localhost port=5432 user=postgres password=postgres dbname=ktaxes sslmode=disable"
